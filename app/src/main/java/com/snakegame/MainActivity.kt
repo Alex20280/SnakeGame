@@ -12,6 +12,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -28,8 +30,10 @@ import com.snakegame.navigation.NavigationScreens
 import com.snakegame.ui.theme.SnakeGameTheme
 import com.snakegame.ui.theme.sceeen.GameScreen
 import com.snakegame.ui.theme.sceeen.ResultScreen
+import com.snakegame.ui.theme.sceeen.SettingsScreen
 import com.snakegame.ui.theme.sceeen.SplashScreenScreen
 import com.snakegame.ui.theme.sceeen.WelcomeScreenScreen
+import com.snakegame.ui.theme.sceeen.viewmodel.SettingsSharedViewModel
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -46,6 +50,12 @@ class MainActivity : ComponentActivity() {
             SnakeGameTheme {
                 val navController = rememberNavController()
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
+
+                val sharedViewModel: SettingsSharedViewModel = viewModel(
+                    viewModelStoreOwner = this
+                )
+
+
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     NavHost(
@@ -76,10 +86,10 @@ class MainActivity : ComponentActivity() {
                                 paddingValues = innerPadding,
                                 onStartClick = {
                                     navController.navigate(NavigationScreens.GameScreen)
+                                },
+                                onSettingsClick = {
+                                    navController.navigate(NavigationScreens.SettingsScreen)
                                 }
-                                 /* onExitClick = {
-                                      (context as? Activity)?.finish()
-                                }*/
                             )
                         }
                         composable<NavigationScreens.GameScreen>(
@@ -89,7 +99,23 @@ class MainActivity : ComponentActivity() {
                             popExitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Right) }
                         ) {
                             GameScreen(
-                                paddingValues = innerPadding
+                                paddingValues = innerPadding,
+                                settingsSharedViewModel = sharedViewModel
+                            )
+                        }
+
+                        composable<NavigationScreens.SettingsScreen>(
+                            enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) },
+                            exitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Left) },
+                            popEnterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Right) },
+                            popExitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Right) }
+                        ) {
+                            SettingsScreen(
+                                paddingValues = innerPadding,
+                                sharedViewModel = sharedViewModel,
+                                onClickBack = {
+                                    navController.popBackStack()
+                                }
                             )
                         }
                         composable<NavigationScreens.ResultScreen>(
@@ -110,4 +136,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-

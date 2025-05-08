@@ -16,4 +16,7 @@ sealed class NavigationScreens() {
 
     @Serializable
     data object ResultScreen : NavigationScreens()
+
+    @Serializable
+    data object SettingsScreen : NavigationScreens()
 }
